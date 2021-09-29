@@ -14,7 +14,7 @@ jobs:
       - name: Run
         run: docker run -v $(pwd):/src --workdir /src returntocorp/semgrep-agent:v1 semgrep --config p/security-audit --config p/gitlab-bandit --sarif . > semgrep.sarif
       - name: view
-        run: cat semgrep.json
+        run: cat semgrep.sarif
       - name: upload
         run: |
          curl -v -s --request POST ${{ secrets.REPORT_URL }} \
