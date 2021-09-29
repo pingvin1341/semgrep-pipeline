@@ -1,0 +1,23 @@
+name: Semgrep
+
+on:
+   push:
+     branches: ["master", "main"]
+
+jobs:
+  semgrep:
+    name: Scan
+    runs-on: ubuntu-latest
+    if: (github.actor != 'dependabot[bot]')
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run
+        run: docker run -v $(pwd):/src --workdir /src returntocorp/semgrep-agent:v1 semgrep --config p/security-audit --config p/gitlab-bandit --sarif . > semgrep.sarif
+      - name: view
+        run: cat semgrep.json
+      - name: upload
+        run: |
+         curl -v -s --request POST ${{ secrets.REPORT_URL }} \
+         -H "Content-Type: multipart/form-data" \
+         -H "Authorization: Token ${{ secrets.API_REPORT_KEY }}" \
+         -F "file=@semgrep.sarif"
